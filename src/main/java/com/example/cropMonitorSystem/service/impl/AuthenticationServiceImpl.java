@@ -3,9 +3,7 @@ package com.example.cropMonitorSystem.service.impl;
 import com.example.cropMonitorSystem.dao.UserDAO;
 import com.example.cropMonitorSystem.dto.impl.ChangePasswordDTO;
 import com.example.cropMonitorSystem.dto.impl.UserDTO;
-import com.example.cropMonitorSystem.entity.impl.FieldEntity;
 import com.example.cropMonitorSystem.entity.impl.UserEntity;
-import com.example.cropMonitorSystem.exception.UserNotFoundException;
 import com.example.cropMonitorSystem.secureAndResponse.response.JwtAuthResponse;
 import com.example.cropMonitorSystem.secureAndResponse.secure.SignIn;
 import com.example.cropMonitorSystem.secureAndResponse.secure.SignUp;
@@ -14,7 +12,6 @@ import com.example.cropMonitorSystem.service.EmailService;
 import com.example.cropMonitorSystem.service.JwtService;
 import com.example.cropMonitorSystem.util.Mapping;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -49,7 +46,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .password(passwordEncoder.encode(signUp.getPassword()))
                 .role(signUp.getRole())
                 .build();
-
         UserEntity save = userDAO.save(mapping.toUserEntity(userDTO));
         String generateToken = jwtService.generateToken(save);
         return JwtAuthResponse.builder().token(generateToken).build();
@@ -74,7 +70,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public JwtAuthResponse refreshToken(String accessToken) {
         //extract username
         var username = jwtService.extractUserName(accessToken);
-        //check the user availability in the DB
+        //check the user availability in the database
         var findUser = userDAO.findByEmail(username).orElseThrow();
         var refreshToken = jwtService.refreshToken(findUser);
         return JwtAuthResponse.builder().token(refreshToken).build();
@@ -89,5 +85,4 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             userDAO.save(referenceById);
         }
     }
-
 }
