@@ -27,7 +27,7 @@ public class UserController {
         return ResponseEntity.ok(authenticationService.signUp(signup));
     }
 
-    @PostMapping("/signIn")
+    @PostMapping(value = "/signIn",consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<JwtAuthResponse> signIn(@RequestBody SignIn signIn){
         return ResponseEntity.ok(authenticationService.signIn(signIn));
     }
