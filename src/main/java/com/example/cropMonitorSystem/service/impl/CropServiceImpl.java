@@ -58,13 +58,13 @@ public class CropServiceImpl implements CropService {
         }
         cropEntity.setFieldList(fieldEntities);
         cropEntity.setLogList(logEntities);
+        CropEntity save = cropDAO.save(cropEntity);
         for (FieldEntity fieldEntity : fieldEntities){
-            fieldEntity.getCropList().add(cropEntity);
+            fieldEntity.getCropList().add(save);
         }
         for (LogEntity logEntity:logEntities){
-            logEntity.getCropList().add(cropEntity);
+            logEntity.getCropList().add(save);
         }
-        cropDAO.save(cropEntity);
         if (cropEntity == null){
             throw new DataPersistException("Crop is not saved.");
         }
