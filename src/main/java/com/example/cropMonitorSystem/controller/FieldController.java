@@ -60,7 +60,7 @@ public class FieldController {
         return fieldService.getSelectedField(fieldId);
     }
 
-    @GetMapping
+    @GetMapping("/getAllFields")
     public List<FieldDTO> getAllField(){
         try {
             return fieldService.getAllField();
