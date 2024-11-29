@@ -59,10 +59,10 @@ public class StaffServiceImpl implements StaffService {
         staffEntity.setVehicleList(vehicleEntities);
         staffEntity.setJoinedDate(toConvertLocalDate(staffDTO.getJoinedDate()));
         staffEntity.setDateOfBirth(toConvertLocalDate(staffDTO.getDateOfBirth()));
-        for (FieldEntity field : fieldEntities){
-            field.getStaffList().add(staffEntity);
-        }
         StaffEntity savedStaff = staffDAO.save(staffEntity);
+        for (FieldEntity field : fieldEntities){
+            field.getStaffList().add(savedStaff);
+        }
         if (savedStaff == null) {
             throw new DataPersistException("Staff member not saved");
         }
