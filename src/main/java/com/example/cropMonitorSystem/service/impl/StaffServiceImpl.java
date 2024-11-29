@@ -1,10 +1,7 @@
 package com.example.cropMonitorSystem.service.impl;
 
 import com.example.cropMonitorSystem.customStatusCode.SelectedErrorStatus;
-import com.example.cropMonitorSystem.dao.FieldDAO;
-import com.example.cropMonitorSystem.dao.LogDAO;
-import com.example.cropMonitorSystem.dao.StaffDAO;
-import com.example.cropMonitorSystem.dao.VehicleDAO;
+import com.example.cropMonitorSystem.dao.*;
 import com.example.cropMonitorSystem.dto.StaffStatus;
 import com.example.cropMonitorSystem.dto.impl.StaffDTO;
 import com.example.cropMonitorSystem.entity.impl.*;
@@ -34,7 +31,7 @@ public class StaffServiceImpl implements StaffService {
     @Autowired
     private VehicleDAO vehicleDAO;
     @Autowired
-    private LogDAO logDAO;
+    private EquipmentDAO equipmentDAO;
 
     @Override
     public void saveStaffMember(StaffDTO staffDTO) {
@@ -48,20 +45,28 @@ public class StaffServiceImpl implements StaffService {
 
         List<FieldEntity> fieldEntities = new ArrayList<>();
         List<VehicleEntity> vehicleEntities = new ArrayList<>();
+        List<EquipmentEntity> equipmentEntities = new ArrayList<>();
         for (String fieldCode : staffDTO.getFieldCodeList()){
             fieldEntities.add(fieldDAO.getReferenceById(fieldCode));
         }
         for (String vehicleCode : staffDTO.getVehicleList()){
             vehicleEntities.add(vehicleDAO.getReferenceById(vehicleCode));
         }
+        for (String equipmentCode : staffDTO.getEquipmentList()){
+            equipmentEntities.add(equipmentDAO.getReferenceById(equipmentCode));
+        }
         StaffEntity staffEntity = mapping.toStaffEntity(staffDTO);
         staffEntity.setFieldList(fieldEntities);
         staffEntity.setVehicleList(vehicleEntities);
+        staffEntity.setEquipmentList(equipmentEntities);
         staffEntity.setJoinedDate(toConvertLocalDate(staffDTO.getJoinedDate()));
         staffEntity.setDateOfBirth(toConvertLocalDate(staffDTO.getDateOfBirth()));
         StaffEntity savedStaff = staffDAO.save(staffEntity);
         for (FieldEntity field : fieldEntities){
             field.getStaffList().add(savedStaff);
+        }
+        for (EquipmentEntity equipment : equipmentEntities){
+            equipment.getStaffCodeList().add(savedStaff);
         }
         if (savedStaff == null) {
             throw new DataPersistException("Staff member not saved");
