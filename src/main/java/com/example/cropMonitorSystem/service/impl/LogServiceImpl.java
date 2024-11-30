@@ -134,7 +134,7 @@ public class LogServiceImpl implements LogService {
         Optional<LogEntity> tmpLog = logDAO.findById(id);
         if (tmpLog.isPresent()){
             tmpLog.get().setDate(logDTO.getDate());
-            tmpLog.get().setLogDetails(logDTO.getDate());
+            tmpLog.get().setLogDetails(logDTO.getLogDetails());
             tmpLog.get().setObservedImage(logDTO.getObservedImage());
             List<StaffEntity> staffEntities = new ArrayList<>();
             List<FieldEntity> fieldEntities = new ArrayList<>();
