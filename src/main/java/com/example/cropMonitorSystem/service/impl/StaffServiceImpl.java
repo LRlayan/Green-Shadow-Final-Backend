@@ -68,6 +68,9 @@ public class StaffServiceImpl implements StaffService {
         for (EquipmentEntity equipment : equipmentEntities){
             equipment.getStaffCodeList().add(savedStaff);
         }
+        for (VehicleEntity vehicle : vehicleEntities){
+            vehicle.setStaff(savedStaff);
+        }
         if (savedStaff == null) {
             throw new DataPersistException("Staff member not saved");
         }
@@ -111,6 +114,7 @@ public class StaffServiceImpl implements StaffService {
             List<FieldEntity> fieldList = staffEntity.getFieldList();
             List<VehicleEntity> vehicleList = staffEntity.getVehicleList();
             List<LogEntity> logList = staffEntity.getLogList();
+            List<EquipmentEntity> equipmentEntity = staffEntity.getEquipmentList();
             for (FieldEntity field : fieldList){
                 List<StaffEntity> staff = field.getStaffList();
                 staff.remove(staffEntity);
@@ -122,9 +126,14 @@ public class StaffServiceImpl implements StaffService {
                 List<StaffEntity> staff = logs.getStaffList();
                 staff.remove(staffEntity);
             }
+            for (EquipmentEntity equipment : equipmentEntity){
+                List<StaffEntity> staff = equipment.getStaffCodeList();
+                staff.remove(staffEntity);
+            }
             staffEntity.getFieldList().clear();
             staffEntity.getVehicleList().clear();
             staffEntity.getLogList().clear();
+            staffEntity.getEquipmentList().clear();
             staffDAO.delete(staffEntity);
         }else {
             throw new StaffNotFoundException("Member Id with" + staffId + "Not found");
