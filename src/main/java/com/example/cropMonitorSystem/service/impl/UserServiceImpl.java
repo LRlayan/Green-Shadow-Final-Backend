@@ -5,13 +5,13 @@ import com.example.cropMonitorSystem.dto.impl.UserWithKey;
 import com.example.cropMonitorSystem.entity.impl.UserEntity;
 import com.example.cropMonitorSystem.service.EmailService;
 import com.example.cropMonitorSystem.service.UserService;
+import com.example.cropMonitorSystem.util.AppUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -37,5 +37,10 @@ public class UserServiceImpl implements UserService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public String getOTP() {
+        return AppUtil.getOTP();
     }
 }
