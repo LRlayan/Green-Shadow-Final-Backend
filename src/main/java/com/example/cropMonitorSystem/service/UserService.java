@@ -9,4 +9,5 @@ public interface UserService {
     UserDetailsService userDetailsService();
 
     boolean sendCodeToChangePassword(UserWithKey userWithKey);
+    String getOTP();
 }
