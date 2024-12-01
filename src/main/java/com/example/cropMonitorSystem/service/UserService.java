@@ -1,13 +1,13 @@
 package com.example.cropMonitorSystem.service;
 
-import com.example.cropMonitorSystem.dto.impl.UserWithKey;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import com.example.cropMonitorSystem.dto.impl.UserDTO;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Service
+@Transactional
 public interface UserService {
-    UserDetailsService userDetailsService();
-
-    boolean sendCodeToChangePassword(UserWithKey userWithKey);
-    String getOTP();
+    List<UserDTO> getALlUsers();
 }
