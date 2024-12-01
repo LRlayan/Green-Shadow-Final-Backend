@@ -1,7 +1,7 @@
 package com.example.cropMonitorSystem.config;
 
 import com.example.cropMonitorSystem.service.JwtService;
-import com.example.cropMonitorSystem.service.UserService;
+import com.example.cropMonitorSystem.service.AuthService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserService userService;
+    private final AuthService authService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
         userEmail = jwtService.extractUserName(jwt);
         if (StringUtils.isNotEmpty(userEmail) && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userService.userDetailsService().loadUserByUsername(userEmail);
+            UserDetails userDetails = authService.userDetailsService().loadUserByUsername(userEmail);
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 SecurityContext context = SecurityContextHolder.createEmptyContext();
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
