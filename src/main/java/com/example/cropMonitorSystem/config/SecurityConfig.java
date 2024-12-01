@@ -1,6 +1,6 @@
 package com.example.cropMonitorSystem.config;
 
-import com.example.cropMonitorSystem.service.UserService;
+import com.example.cropMonitorSystem.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +35,7 @@ import java.util.Arrays;
 )
 public class SecurityConfig {
 
-    private final UserService userService;
+    private final AuthService authService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
@@ -72,7 +72,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider(){
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(userService.userDetailsService());
+        daoAuthenticationProvider.setUserDetailsService(authService.userDetailsService());
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
         return daoAuthenticationProvider;
     }
