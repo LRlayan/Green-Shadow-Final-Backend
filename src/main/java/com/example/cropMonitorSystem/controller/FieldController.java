@@ -26,7 +26,7 @@ public class FieldController {
     @Autowired
     private FieldService fieldService;
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> saveField(
             @RequestPart("name") String fieldName,
@@ -57,19 +57,19 @@ public class FieldController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @GetMapping(value = "/{fieldId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public FieldStatus getSelectedField(@PathVariable("fieldId") String fieldId){
         return fieldService.getSelectedField(fieldId);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST','ADMINISTRATOR')")
     @GetMapping("/{getAllFields}")
     public List<FieldDTO> getAllField() throws IOException, ClassNotFoundException {
         return fieldService.getAllField();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @DeleteMapping(value = "/{fieldId}")
     public ResponseEntity<Void> deleteField(@PathVariable ("fieldId") String fieldId){
         try {
@@ -86,7 +86,7 @@ public class FieldController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @PutMapping(value = "/{fieldId}")
     public void updateField(
             @PathVariable("fieldId") String fieldId ,
