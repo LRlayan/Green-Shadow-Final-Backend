@@ -25,7 +25,7 @@ public class LogController {
     @Autowired
     private LogService logService;
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> saveLog(
             @RequestPart("date") String date,
@@ -54,19 +54,19 @@ public class LogController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @GetMapping(value = "/{logId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public LogStatus getSelectedLog(@PathVariable("logId") String logId){
         return null;
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST','ADMINISTRATOR')")
     @GetMapping
     public List<LogDTO> getAllLog(){
         return logService.getAllLog();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @DeleteMapping(value = "/{logId}")
     public ResponseEntity<Void> deleteLog(@PathVariable ("logId") String logId){
         try {
@@ -83,7 +83,7 @@ public class LogController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @PutMapping(value = "/{logId}")
     public void updateLog(
             @PathVariable("logId") String logId,
