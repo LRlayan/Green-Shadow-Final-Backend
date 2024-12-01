@@ -12,11 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class SignIn {
-
     @NotNull(message = "Email cannot be null")
     @Email
     private String email;
-
     @NotNull(message = "password cannot be null")
     private String password;
 }
