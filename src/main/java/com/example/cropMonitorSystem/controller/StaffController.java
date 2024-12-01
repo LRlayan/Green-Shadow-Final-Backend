@@ -23,7 +23,7 @@ public class StaffController {
     @Autowired
     private StaffService staffService;
 
-    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMINISTRATIVE')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> saveStaff(@RequestBody StaffDTO staffDTO){
         try{
@@ -41,7 +41,7 @@ public class StaffController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMINISTRATIVE')")
     @GetMapping(value = "/{staffId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public StaffStatus getSelectedStaff(@PathVariable("staffId") String staffId){
         if (!Regex.idValidator(staffId).matches()){
@@ -50,13 +50,13 @@ public class StaffController {
         return staffService.getSelectedStaffMember(staffId);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMINISTRATIVE','SCIENTIST')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<StaffDTO> getAllStaff(){
         return staffService.getAllStaffMember();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMINISTRATIVE')")
     @DeleteMapping(value = "/{staffId}")
     public ResponseEntity<Void> deleteStaff(@PathVariable ("staffId") String staffId){
         try{
@@ -73,7 +73,7 @@ public class StaffController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMINISTRATIVE')")
     @PutMapping(value = "/{staffId}",consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> updateStaff(@PathVariable ("staffId") String staffId ,@RequestBody StaffDTO staffDTO){
         try{
