@@ -48,8 +48,13 @@ public class UserController {
         }
     }
 
+    @GetMapping(value = "/getOTP")
+    public String getOTP(){
+        return userService.getOTP();
+    }
+
     @PostMapping(value = "/changePassword")
-    public ResponseEntity<Void> changePassword(@RequestBody() ChangePasswordDTO changePasswordDTO){
+    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO){
         try {
             authenticationService.changePassword(changePasswordDTO);
             return new ResponseEntity<>(HttpStatus.CREATED);
