@@ -50,7 +50,7 @@ public class JwtServiceImpl implements JwtService {
     private String refreshToken(Map<String, Object> extractClaims, UserDetails userDetails) {
         extractClaims.put("role", userDetails.getAuthorities());
         Date now = new Date();
-        Date refreshExpire = new Date(now.getTime() + 1000 * 600 * 600);
+        Date refreshExpire = new Date(now.getTime() + 100 * 1000 * 600);
 
         return Jwts.builder().setClaims(extractClaims)
                 .setSubject(userDetails.getUsername())
@@ -61,7 +61,7 @@ public class JwtServiceImpl implements JwtService {
     private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 50000 * 10000))
+                .setExpiration(new Date(System.currentTimeMillis() + 1800000))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
     }
 
