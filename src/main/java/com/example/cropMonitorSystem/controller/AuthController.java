@@ -8,6 +8,7 @@ import com.example.cropMonitorSystem.secureAndResponse.secure.SignIn;
 import com.example.cropMonitorSystem.secureAndResponse.secure.SignUp;
 import com.example.cropMonitorSystem.service.AuthenticationService;
 import com.example.cropMonitorSystem.service.AuthService;
+import com.example.cropMonitorSystem.util.AppUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,6 +26,10 @@ public class AuthController {
 
     @PostMapping("/signUp")
     public ResponseEntity<JwtAuthResponse> signup(@RequestBody SignUp signup){
+        SignUp signUp = new SignUp();
+        signUp.setEmail(signUp.getEmail());
+        signUp.setRole(signUp.getRole());
+        signUp.setPassword(AppUtil.temporaryUserPasswordGenerator());
         return ResponseEntity.ok(authenticationService.signUp(signup));
     }
 
