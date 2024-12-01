@@ -23,7 +23,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
-
     private final Mapping mapping;
     private final UserDAO userDAO;
     private final JwtService jwtService;
@@ -53,15 +52,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public JwtAuthResponse signIn(SignIn signIn) {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(signIn.getEmail(), signIn.getPassword())
-            );
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(signIn.getEmail(), signIn.getPassword())
+        );
         UserEntity user = userDAO.findByEmail(signIn.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         var generateToken = jwtService.generateToken(user);
         return JwtAuthResponse.builder().token(generateToken).build();
     }
