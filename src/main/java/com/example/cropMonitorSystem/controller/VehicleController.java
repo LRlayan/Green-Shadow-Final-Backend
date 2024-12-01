@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class VehicleController {
     @Autowired
     private VehicleService vehicleService;
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> saveVehicle(@RequestBody VehicleDTO vehicleDTO){
         try{
@@ -35,6 +37,7 @@ public class VehicleController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @GetMapping(value = "/{vehicleId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public VehicleStatus getSelectedVehicle(@PathVariable("vehicleId") String vehicleId){
         if (!Regex.idValidator(vehicleId).matches()){
@@ -43,11 +46,13 @@ public class VehicleController {
         return vehicleService.getSelectedVehicle(vehicleId);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<VehicleDTO> getAllVehicle(){
         return vehicleService.getAllVehicle();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @DeleteMapping(value = "/{vehicleId}")
     public ResponseEntity<Void> deleteVehicle(@PathVariable ("vehicleId") String vehicleId){
         try{
@@ -64,6 +69,7 @@ public class VehicleController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @PutMapping(value = "/{vehicleId}",consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> updateVehicle(@PathVariable ("vehicleId") String vehicleId ,@RequestBody VehicleDTO vehicleDTO){
         try{

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class StaffController {
     @Autowired
     private StaffService staffService;
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> saveStaff(@RequestBody StaffDTO staffDTO){
         try{
@@ -39,6 +41,7 @@ public class StaffController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @GetMapping(value = "/{staffId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public StaffStatus getSelectedStaff(@PathVariable("staffId") String staffId){
         if (!Regex.idValidator(staffId).matches()){
@@ -47,11 +50,13 @@ public class StaffController {
         return staffService.getSelectedStaffMember(staffId);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<StaffDTO> getAllStaff(){
         return staffService.getAllStaffMember();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @DeleteMapping(value = "/{staffId}")
     public ResponseEntity<Void> deleteStaff(@PathVariable ("staffId") String staffId){
         try{
@@ -68,6 +73,7 @@ public class StaffController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @PutMapping(value = "/{staffId}",consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> updateStaff(@PathVariable ("staffId") String staffId ,@RequestBody StaffDTO staffDTO){
         try{

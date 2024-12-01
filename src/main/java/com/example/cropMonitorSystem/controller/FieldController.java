@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +26,7 @@ public class FieldController {
     @Autowired
     private FieldService fieldService;
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> saveField(
             @RequestPart("name") String fieldName,
@@ -55,21 +57,19 @@ public class FieldController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
     @GetMapping(value = "/{fieldId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public FieldStatus getSelectedField(@PathVariable("fieldId") String fieldId){
         return fieldService.getSelectedField(fieldId);
     }
 
-    @GetMapping("/getAllFields")
-    public List<FieldDTO> getAllField(){
-        try {
-            return fieldService.getAllField();
-        }catch (Exception e){
-            e.printStackTrace();
-            return new ArrayList<>();
-        }
+    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @GetMapping("/{getAllFields}")
+    public List<FieldDTO> getAllField() throws IOException, ClassNotFoundException {
+        return fieldService.getAllField();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
     @DeleteMapping(value = "/{fieldId}")
     public ResponseEntity<Void> deleteField(@PathVariable ("fieldId") String fieldId){
         try {
@@ -86,6 +86,7 @@ public class FieldController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
     @PutMapping(value = "/{fieldId}")
     public void updateField(
             @PathVariable("fieldId") String fieldId ,

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class EquipmentController {
     @Autowired
     private EquipmentService equipmentService;
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> saveEquipment(@RequestBody EquipmentDTO equipmentDTO){
         try{
@@ -36,6 +38,7 @@ public class EquipmentController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @GetMapping(value = "/{equipmentId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public EquipmentStatus getSelectedEquipment(@PathVariable("equipmentId") String equipmentId){
         if (!Regex.idValidator(equipmentId).matches()){
@@ -44,11 +47,13 @@ public class EquipmentController {
         return equipmentService.getSelectedEquipment(equipmentId);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<EquipmentDTO> getAllEquipment(){
         return equipmentService.getAllEquipment();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @DeleteMapping(value = "/{equipmentId}")
     public ResponseEntity<Void> deleteEquipment(@PathVariable ("equipmentId") String equipmentId){
         try{
@@ -65,6 +70,7 @@ public class EquipmentController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
     @PutMapping(value = "/{equipmentId}",consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> updateEquipment(@PathVariable ("equipmentId") String equipmentId ,@RequestBody EquipmentDTO equipmentDTO){
         try{
