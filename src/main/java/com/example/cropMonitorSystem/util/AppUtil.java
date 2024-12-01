@@ -13,4 +13,9 @@ public class AppUtil {
         int otp = 1000 + random.nextInt(9000);
         return String.valueOf(otp);
     }
+    public static String temporaryUserPasswordGenerator(){
+        Random random = new Random();
+        int otp = 10000 + random.nextInt(90000);
+        return String.valueOf(otp);
+    }
 }
