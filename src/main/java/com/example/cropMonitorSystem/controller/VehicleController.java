@@ -23,7 +23,7 @@ public class VehicleController {
     @Autowired
     private VehicleService vehicleService;
 
-    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMINISTRATIVE')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> saveVehicle(@RequestBody VehicleDTO vehicleDTO){
         try{
@@ -37,7 +37,7 @@ public class VehicleController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMINISTRATIVE')")
     @GetMapping(value = "/{vehicleId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public VehicleStatus getSelectedVehicle(@PathVariable("vehicleId") String vehicleId){
         if (!Regex.idValidator(vehicleId).matches()){
@@ -46,13 +46,13 @@ public class VehicleController {
         return vehicleService.getSelectedVehicle(vehicleId);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMINISTRATIVE','SCIENTIST')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<VehicleDTO> getAllVehicle(){
         return vehicleService.getAllVehicle();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMINISTRATIVE')")
     @DeleteMapping(value = "/{vehicleId}")
     public ResponseEntity<Void> deleteVehicle(@PathVariable ("vehicleId") String vehicleId){
         try{
@@ -69,7 +69,7 @@ public class VehicleController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','ADMINISTRATIVE')")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMINISTRATIVE')")
     @PutMapping(value = "/{vehicleId}",consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> updateVehicle(@PathVariable ("vehicleId") String vehicleId ,@RequestBody VehicleDTO vehicleDTO){
         try{
