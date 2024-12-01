@@ -25,7 +25,7 @@ public class CropController {
     @Autowired
     private CropService cropService;
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> saveCrop(
             @RequestPart("cropName") String cropName,
@@ -54,19 +54,19 @@ public class CropController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @GetMapping(value = "/{cropId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public CropStatus getSelectedCrop(@PathVariable ("cropId") String cropId){
         return null;
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST','ADMINISTRATOR')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<CropDTO> getAllCrop(){
         return cropService.getAllCrop();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @DeleteMapping(value = "/{cropId}")
     public ResponseEntity<Void> deleteCrop(@PathVariable ("cropId") String cropId){
         try {
@@ -83,7 +83,7 @@ public class CropController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SCIENTIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @PutMapping(value = "/{cropId}")
     public void updateCrop(
             @PathVariable("cropId") String cropId,
