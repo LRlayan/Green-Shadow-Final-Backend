@@ -1,6 +1,6 @@
 package com.example.cropMonitorSystem.exception;
 
-public class UserNotFoundException {
+public class UserNotFoundException extends Throwable {
     public UserNotFoundException() {
 
     }
