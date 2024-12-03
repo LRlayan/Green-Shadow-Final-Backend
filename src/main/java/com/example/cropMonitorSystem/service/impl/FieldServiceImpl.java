@@ -93,11 +93,17 @@ public class FieldServiceImpl implements FieldService {
         if (fieldDAO.existsById(id)){
             FieldEntity fieldEntity = fieldDAO.getReferenceById(id);
             List<EquipmentEntity> equipmentEntities = fieldEntity.getEquipmentsList();
+            List<StaffEntity> staffEntities = fieldEntity.getStaffList();
             for (EquipmentEntity equipmentEntity:equipmentEntities){
                 List<FieldEntity> fields = equipmentEntity.getFieldList();
                 fields.remove(fieldEntity);
             }
+            for (StaffEntity staffEntity:staffEntities){
+                List<FieldEntity> fields = staffEntity.getFieldList();
+                fields.remove(fieldEntity);
+            }
             fieldEntity.getEquipmentsList().clear();
+            fieldEntity.getStaffList().clear();
         }
         if (!selectedField.isPresent()){
             throw new FieldNotFoundException("Field with id " + id + "not found");
