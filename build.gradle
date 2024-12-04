@@ -40,6 +40,9 @@ dependencies {
 	implementation 'org.apache.commons:commons-lang3:3.12.0'
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-mail
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '3.4.0'
+	// https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
+	testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.7'
+	implementation "org.slf4j:slf4j-api:2.0.16"
 }
 
 tasks.named('test') {
