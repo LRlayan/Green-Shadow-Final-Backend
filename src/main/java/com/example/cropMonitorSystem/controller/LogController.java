@@ -1,12 +1,15 @@
 package com.example.cropMonitorSystem.controller;
 
 import com.example.cropMonitorSystem.dto.LogStatus;
+import com.example.cropMonitorSystem.dto.impl.FieldDTO;
 import com.example.cropMonitorSystem.dto.impl.LogDTO;
 import com.example.cropMonitorSystem.exception.CropNotFoundException;
 import com.example.cropMonitorSystem.exception.DataPersistException;
 import com.example.cropMonitorSystem.service.LogService;
 import com.example.cropMonitorSystem.util.AppUtil;
 import com.example.cropMonitorSystem.util.Regex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,6 +27,7 @@ import java.util.List;
 public class LogController {
     @Autowired
     private LogService logService;
+    private static final Logger logger = LoggerFactory.getLogger(LogController.class);
 
     @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -44,12 +48,13 @@ public class LogController {
             logDTO.setCropList(cropList);
             logDTO.setFieldList(fieldList);
             logService.saveLog(logDTO);
+            logger.info("Log saved successfully for date: {}", date);
             return new ResponseEntity<>(HttpStatus.CREATED);
         }catch (DataPersistException e){
-            e.printStackTrace();
+            logger.error("Error saving log for date: {}", date, e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }catch (Exception e){
-            e.printStackTrace();
+            logger.error("Unexpected error occurred while saving log for date: {}", date, e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -63,7 +68,9 @@ public class LogController {
     @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST','ADMINISTRATOR')")
     @GetMapping
     public List<LogDTO> getAllLog(){
-        return logService.getAllLog();
+        List<LogDTO> logs = logService.getAllLog();
+        logger.info("Successfully retrieved all log details.", logs.size());
+        return logs;
     }
 
     @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
@@ -71,14 +78,17 @@ public class LogController {
     public ResponseEntity<Void> deleteLog(@PathVariable ("logId") String logId){
         try {
             if (!Regex.idValidator(logId).matches()){
+                logger.warn("Invalid log ID format: {}", logId);
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             logService.deleteLog(logId);
+            logger.info("Successfully deleted log with ID: {}", logId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }catch (CropNotFoundException e){
-            e.printStackTrace();
+            logger.error("Log not found with ID: {}", logId, e);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }catch (Exception e){
+            logger.error("Error occurred while deleting log with ID: {}", logId, e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -102,5 +112,6 @@ public class LogController {
         logDTO.setCropList(cropList);
         logDTO.setFieldList(fieldList);
         logService.updateLog(logId,logDTO);
+        logger.info("Successfully updated log with ID: {}", logId);
     }
 }

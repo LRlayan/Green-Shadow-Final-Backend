@@ -7,6 +7,8 @@ import com.example.cropMonitorSystem.exception.FieldNotFoundException;
 import com.example.cropMonitorSystem.service.FieldService;
 import com.example.cropMonitorSystem.util.AppUtil;
 import com.example.cropMonitorSystem.util.Regex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,6 +27,7 @@ import java.util.List;
 public class FieldController {
     @Autowired
     private FieldService fieldService;
+    private static final Logger logger = LoggerFactory.getLogger(FieldController.class);
 
     @PreAuthorize("hasAnyRole('MANAGER')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -47,12 +50,13 @@ public class FieldController {
             fieldDTO.setMemberCodeList(staffList);
             fieldDTO.setCropCodeList(cropList);
             fieldService.saveField(fieldDTO);
+            logger.info("Successfully saved field with name: {}", fieldName);
             return new ResponseEntity<>(HttpStatus.CREATED);
         }catch (DataPersistException e){
-            e.printStackTrace();
+            logger.error("Error occurred while saving field with name {}: Data persist error", fieldName);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }catch (Exception e){
-            e.printStackTrace();
+            logger.error("Error occurred while saving field with name {}: Unexpected error", fieldName, e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -60,13 +64,27 @@ public class FieldController {
     @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @GetMapping(value = "/{fieldId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public FieldStatus getSelectedField(@PathVariable("fieldId") String fieldId){
-        return fieldService.getSelectedField(fieldId);
+        try {
+            FieldStatus fieldStatus = fieldService.getSelectedField(fieldId);
+            logger.info("Successfully retrieved field details for field ID: {}", fieldId);
+            return fieldStatus;
+        } catch (Exception e) {
+            logger.error("Error occurred while retrieving field with ID: {}", fieldId, e);
+            throw e;
+        }
     }
 
     @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST','ADMINISTRATOR')")
     @GetMapping("/{getAllFields}")
     public List<FieldDTO> getAllField() throws IOException, ClassNotFoundException {
-        return fieldService.getAllField();
+        try {
+            List<FieldDTO> fields = fieldService.getAllField();
+            logger.info("Successfully retrieved all field details.", fields.size());
+            return fields;
+        } catch (IOException | ClassNotFoundException e) {
+            logger.error("Error occurred while retrieving all field details with parameter: {}", e);
+            throw e;
+        }
     }
 
     @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
@@ -74,14 +92,17 @@ public class FieldController {
     public ResponseEntity<Void> deleteField(@PathVariable ("fieldId") String fieldId){
         try {
             if (!Regex.idValidator(fieldId).matches()){
+                logger.warn("Invalid field ID format: {}", fieldId);
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             fieldService.deleteField(fieldId);
+            logger.info("Successfully deleted field with ID: {}", fieldId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }catch (FieldNotFoundException e){
-            e.printStackTrace();
+            logger.error("Field with ID {} not found: {}", fieldId, e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }catch (Exception e){
+            logger.error("Error occurred while deleting field with ID {}: {}", fieldId, e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -107,6 +128,7 @@ public class FieldController {
         fieldDTO.setFieldImage2(AppUtil.imageBase64(fieldImage2.getBytes()));
         fieldDTO.setMemberCodeList(staffList);
         fieldDTO.setCropCodeList(cropList);
+        logger.info("Successfully updated field with ID: {}", fieldId);
         fieldService.updateField(fieldId,fieldDTO);
     }
 }

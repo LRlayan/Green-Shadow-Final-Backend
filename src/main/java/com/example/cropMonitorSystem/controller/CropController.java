@@ -7,6 +7,8 @@ import com.example.cropMonitorSystem.exception.CropNotFoundException;
 import com.example.cropMonitorSystem.exception.DataPersistException;
 import com.example.cropMonitorSystem.util.AppUtil;
 import com.example.cropMonitorSystem.util.Regex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,6 +26,7 @@ import java.util.List;
 public class CropController {
     @Autowired
     private CropService cropService;
+    private static final Logger logger = LoggerFactory.getLogger(CropController.class);
 
     @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -44,12 +47,13 @@ public class CropController {
             cropDTO.setCropImage(AppUtil.imageBase64(cropImage.getBytes()));
             cropDTO.setFieldCodeList(fieldList);
             cropService.saveCrop(cropDTO);
+            logger.info("Crop saved successfully with name: {}", cropName);
             return new ResponseEntity<>(HttpStatus.CREATED);
         }catch (DataPersistException e){
-            e.printStackTrace();
+            logger.error("Error persisting crop data for cropName: {}", cropName, e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }catch (Exception e){
-            e.printStackTrace();
+            logger.error("Unexpected error occurred while saving crop data for cropName: {}", cropName, e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -63,7 +67,14 @@ public class CropController {
     @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST','ADMINISTRATOR')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<CropDTO> getAllCrop(){
-        return cropService.getAllCrop();
+        try {
+            List<CropDTO> crops = cropService.getAllCrop();
+            logger.info("Successfully retrieved {} crops.", crops.size());
+            return crops;
+        } catch (Exception e) {
+            logger.error("Error occurred while retrieving crops.", e);
+            throw e;
+        }
     }
 
     @PreAuthorize("hasAnyRole('MANAGER','SCIENTIST')")
@@ -71,14 +82,17 @@ public class CropController {
     public ResponseEntity<Void> deleteCrop(@PathVariable ("cropId") String cropId){
         try {
             if (!Regex.idValidator(cropId).matches()){
+                logger.warn("Invalid crop ID format: {}", cropId);
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             cropService.deleteCrop(cropId);
+            logger.info("Successfully deleted crop with ID: {}", cropId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }catch (CropNotFoundException e){
-            e.printStackTrace();
+            logger.error("Crop not found with ID: {}", cropId, e);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }catch (Exception e){
+            logger.error("Error occurred while deleting crop with ID: {}", cropId, e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -101,5 +115,6 @@ public class CropController {
         cropDTO.setSeason(season);
         cropDTO.setCropImage(AppUtil.imageBase64(cropImage.getBytes()));
         cropService.updateCrop(cropId,cropDTO);
+        logger.info("Successfully updated crop with ID: {}", cropId);
     }
 }
