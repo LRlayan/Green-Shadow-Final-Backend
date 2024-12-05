@@ -18,7 +18,7 @@ public class EmailServiceImpl implements EmailService {
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
-        message.setFrom("rameshlayan4@gmail.com"); // Optional: explicitly set "from" email address
+        message.setFrom("rameshlayan4@gmail.com");
         javaMailSender.send(message);
     }
 }
