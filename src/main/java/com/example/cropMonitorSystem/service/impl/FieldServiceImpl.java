@@ -7,7 +7,6 @@ import com.example.cropMonitorSystem.dto.impl.*;
 import com.example.cropMonitorSystem.entity.impl.*;
 import com.example.cropMonitorSystem.exception.DataPersistException;
 import com.example.cropMonitorSystem.exception.FieldNotFoundException;
-import com.example.cropMonitorSystem.service.EquipmentService;
 import com.example.cropMonitorSystem.service.FieldService;
 import com.example.cropMonitorSystem.util.Mapping;
 import org.slf4j.Logger;
@@ -110,18 +109,25 @@ public class FieldServiceImpl implements FieldService {
             FieldEntity fieldEntity = fieldDAO.getReferenceById(id);
             List<EquipmentEntity> equipmentEntities = fieldEntity.getEquipmentsList();
             List<StaffEntity> staffEntities = fieldEntity.getStaffList();
+            List<LogEntity> logEntities = fieldEntity.getLogList();
             for (EquipmentEntity equipmentEntity:equipmentEntities){
                 List<FieldEntity> fields = equipmentEntity.getFieldList();
                 fields.remove(fieldEntity);
-                logger.debug("Removed Field from EquipmentEntity with ID: {}", equipmentEntity.getFieldList().size());
+                logger.debug("Removed Field from FieldEntity with ID: {}", equipmentEntity.getFieldList().size());
             }
             for (StaffEntity staffEntity:staffEntities){
                 List<FieldEntity> fields = staffEntity.getFieldList();
                 fields.remove(fieldEntity);
-                logger.debug("Removed Field from StaffEntity with ID: {}", staffEntity.getFieldList().size());
+                logger.debug("Removed Field from FieldEntity with ID: {}", staffEntity.getFieldList().size());
+            }
+            for (LogEntity logEntity:logEntities){
+                List<FieldEntity> fields = logEntity.getFieldList();
+                fields.remove(fieldEntity);
+                logger.debug("Removed Log from FieldEntity with ID: {}", logEntity.getFieldList().size());
             }
             fieldEntity.getEquipmentsList().clear();
             fieldEntity.getStaffList().clear();
+            fieldEntity.getLogList().clear();
             logger.debug("Cleared relationships for FieldEntity with ID: {}", id);
         }
         if (!selectedField.isPresent()){
