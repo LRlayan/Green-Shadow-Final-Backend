@@ -34,7 +34,7 @@ public class EquipmentServiceImpl implements EquipmentService {
     private StaffDAO staffDAO;
     @Autowired
     private Mapping mapping;
-    private static final Logger logger = LoggerFactory.getLogger(EquipmentService.class);
+    private static final Logger logger = LoggerFactory.getLogger(EquipmentServiceImpl.class);
 
     @Override
     public void saveEquipment(EquipmentDTO equipmentDTO) {

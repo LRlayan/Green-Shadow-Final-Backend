@@ -33,7 +33,7 @@ public class CropServiceImpl implements CropService {
     private LogDAO logDAO;
     @Autowired
     private Mapping mapping;
-    private static final Logger logger = LoggerFactory.getLogger(CropService.class);
+    private static final Logger logger = LoggerFactory.getLogger(CropServiceImpl.class);
 
     @Override
     public void saveCrop(CropDTO cropDTO) {
