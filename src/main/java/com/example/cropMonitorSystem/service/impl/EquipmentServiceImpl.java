@@ -102,10 +102,16 @@ public class EquipmentServiceImpl implements EquipmentService {
         if (equipmentDAO.existsById(id)){
             EquipmentEntity equipment = equipmentDAO.getReferenceById(id);
             List<FieldEntity> fieldEntities = equipment.getFieldList();
+            List<StaffEntity> staffEntities = equipment.getStaffCodeList();
             for(FieldEntity field :fieldEntities){
                 List<EquipmentEntity> equipmentEntities = field.getEquipmentsList();
                 equipmentEntities.remove(equipment);
                 logger.debug("Removed Equipment from FieldEntity with ID: {}", field.getFieldCode());
+            }
+            for(StaffEntity staff :staffEntities){
+                List<EquipmentEntity> equipmentEntities = staff.getEquipmentList();
+                equipmentEntities.remove(equipment);
+                logger.debug("Removed Equipment from StaffEntity with ID: {}", staff.getMemberCode());
             }
             equipment.getFieldList().clear();
             logger.debug("Cleared relationships for EquipmentEntity with ID: {}", id);
