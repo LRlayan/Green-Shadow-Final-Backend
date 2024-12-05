@@ -7,8 +7,11 @@ import com.example.cropMonitorSystem.dto.impl.StaffDTO;
 import com.example.cropMonitorSystem.entity.impl.*;
 import com.example.cropMonitorSystem.exception.DataPersistException;
 import com.example.cropMonitorSystem.exception.StaffNotFoundException;
+import com.example.cropMonitorSystem.service.EquipmentService;
 import com.example.cropMonitorSystem.service.StaffService;
 import com.example.cropMonitorSystem.util.Mapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +35,7 @@ public class StaffServiceImpl implements StaffService {
     private VehicleDAO vehicleDAO;
     @Autowired
     private EquipmentDAO equipmentDAO;
+    private static final Logger logger = LoggerFactory.getLogger(EquipmentServiceImpl.class);
 
     @Override
     public void saveStaffMember(StaffDTO staffDTO) {
@@ -48,12 +52,15 @@ public class StaffServiceImpl implements StaffService {
         List<EquipmentEntity> equipmentEntities = new ArrayList<>();
         for (String fieldCode : staffDTO.getFieldCodeList()){
             fieldEntities.add(fieldDAO.getReferenceById(fieldCode));
+            logger.debug("Field with code {} found and associated.", fieldCode);
         }
         for (String vehicleCode : staffDTO.getVehicleList()){
             vehicleEntities.add(vehicleDAO.getReferenceById(vehicleCode));
+            logger.debug("Vehicle with code {} found and associated.", vehicleCode);
         }
         for (String equipmentCode : staffDTO.getEquipmentList()){
             equipmentEntities.add(equipmentDAO.getReferenceById(equipmentCode));
+            logger.debug("Equipment with code {} found and associated.", equipmentCode);
         }
         StaffEntity staffEntity = mapping.toStaffEntity(staffDTO);
         staffEntity.setFieldList(fieldEntities);
@@ -62,6 +69,7 @@ public class StaffServiceImpl implements StaffService {
         staffEntity.setJoinedDate(toConvertLocalDate(staffDTO.getJoinedDate()));
         staffEntity.setDateOfBirth(toConvertLocalDate(staffDTO.getDateOfBirth()));
         StaffEntity savedStaff = staffDAO.save(staffEntity);
+        logger.info("Staff saved with code: {}", staffEntity.getMemberCode());
         for (FieldEntity field : fieldEntities){
             field.getStaffList().add(savedStaff);
         }
@@ -72,14 +80,15 @@ public class StaffServiceImpl implements StaffService {
             vehicle.setStaff(savedStaff);
         }
         if (savedStaff == null) {
+            logger.error("Failed to staff. StaffEntity is null.");
             throw new DataPersistException("Staff member not saved");
         }
     }
 
     @Override
     public List<StaffDTO> getAllStaffMember() {
+        logger.info("Fetching and mapping all staff from the database.");
         List<StaffDTO> staffDTOS = new ArrayList<>();
-
         for (StaffEntity staff : staffDAO.findAll()){
             List<String> list = new ArrayList<>();
             List<String> vehicleCodeList = new ArrayList<>();
@@ -104,6 +113,7 @@ public class StaffServiceImpl implements StaffService {
             staffDTO.setLogList(logCodeList);
             staffDTOS.add(staffDTO);
         }
+        logger.info("Successfully fetched and mapped {} staff.", staffDTOS.size());
         return staffDTOS;
     }
 
@@ -118,6 +128,7 @@ public class StaffServiceImpl implements StaffService {
             for (FieldEntity field : fieldList){
                 List<StaffEntity> staff = field.getStaffList();
                 staff.remove(staffEntity);
+                logger.debug("Removed Field from FieldEntity with ID: {}", field.getFieldCode());
             }
             for (VehicleEntity vehicle : vehicleList){
                 vehicle.setStaff(null);
@@ -125,16 +136,20 @@ public class StaffServiceImpl implements StaffService {
             for (LogEntity logs : logList){
                 List<StaffEntity> staff = logs.getStaffList();
                 staff.remove(staffEntity);
+                logger.debug("Removed Log from StaffEntity with ID: {}", logs.getLogCode());
             }
             for (EquipmentEntity equipment : equipmentEntity){
                 List<StaffEntity> staff = equipment.getStaffCodeList();
                 staff.remove(staffEntity);
+                logger.debug("Removed Equipment from StaffEntity with ID: {}", equipment.getEquipmentCode());
             }
             staffEntity.getFieldList().clear();
             staffEntity.getVehicleList().clear();
             staffEntity.getLogList().clear();
             staffEntity.getEquipmentList().clear();
+            logger.debug("Cleared relationships for StaffEntity with ID: {}", staffId);
             staffDAO.delete(staffEntity);
+            logger.info("Successfully deleted staff with ID: {}", staffId);
         }else {
             throw new StaffNotFoundException("Member Id with" + staffId + "Not found");
         }
@@ -158,6 +173,7 @@ public class StaffServiceImpl implements StaffService {
             tmpMember.get().setContactNo(staffDTO.getContactNo());
             tmpMember.get().setEmail(staffDTO.getEmail());
             tmpMember.get().setRole(staffDTO.getRole());
+            logger.info("Successfully updated staff with ID: {}", id);
         }
     }
 
@@ -165,8 +181,10 @@ public class StaffServiceImpl implements StaffService {
     public StaffStatus getSelectedStaffMember(String staffId) {
         if(staffDAO.existsById(staffId)){
             var selectedMember = staffDAO.getReferenceById(staffId);
+            logger.info("Staff with ID {} successfully fetched.", staffId);
             return mapping.toStaffDTO(selectedMember);
         }else {
+            logger.warn("Staff with ID {} not found.", staffId);
             return new SelectedErrorStatus(2,"Selected Member not found");
         }
     }

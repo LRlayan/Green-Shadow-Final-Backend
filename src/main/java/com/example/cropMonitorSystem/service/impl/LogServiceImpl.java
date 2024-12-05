@@ -12,8 +12,11 @@ import com.example.cropMonitorSystem.entity.impl.LogEntity;
 import com.example.cropMonitorSystem.entity.impl.StaffEntity;
 import com.example.cropMonitorSystem.exception.CropNotFoundException;
 import com.example.cropMonitorSystem.exception.DataPersistException;
+import com.example.cropMonitorSystem.service.FieldService;
 import com.example.cropMonitorSystem.service.LogService;
 import com.example.cropMonitorSystem.util.Mapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +38,7 @@ public class LogServiceImpl implements LogService {
     private FieldDAO fieldDAO;
     @Autowired
     private Mapping mapping;
+    private static final Logger logger = LoggerFactory.getLogger(LogServiceImpl.class);
 
     @Override
     public void saveLog(LogDTO logDTO) {
@@ -51,16 +55,25 @@ public class LogServiceImpl implements LogService {
         for (String cropCode :logDTO.getCropList()){
             if (cropDAO.existsById(cropCode)){
                 cropEntities.add(cropDAO.getReferenceById(cropCode));
+                logger.debug("Crop with code {} found and associated.", cropCode);
+            }else {
+                logger.warn("Crop with code {} does not exist.", cropCode);
             }
         }
         for (String fieldCode:logDTO.getFieldList()){
             if (fieldDAO.existsById(fieldCode)){
                 fieldEntities.add(fieldDAO.getReferenceById(fieldCode));
+                logger.debug("Field with code {} found and associated.", fieldCode);
+            }else {
+                logger.warn("Field with code {} does not exist.", fieldCode);
             }
         }
         for (String staffCode:logDTO.getStaffList()){
             if (staffDAO.existsById(staffCode)){
                 staffEntities.add(staffDAO.getReferenceById(staffCode));
+                logger.debug("Staff with code {} found and associated.", staffCode);
+            }else {
+                logger.warn("Staff with code {} does not exist.", staffCode);
             }
         }
         LogEntity logEntity = mapping.toLogEntity(logDTO);
@@ -71,6 +84,7 @@ public class LogServiceImpl implements LogService {
             fieldEntity.getLogList().add(logEntity);
         }
         LogEntity saveLog = logDAO.save(logEntity);
+        logger.info("Log saved with code: {}", saveLog.getLogCode());
         if (saveLog==null){
             throw new DataPersistException("Field is not saved.");
         }
@@ -78,6 +92,7 @@ public class LogServiceImpl implements LogService {
 
     @Override
     public List<LogDTO> getAllLog() {
+        logger.info("Fetching and mapping all log from the database.");
         List<LogDTO> logDTOS = new ArrayList<>();
         for (LogEntity logEntity:logDAO.findAll()){
             List<String> fieldCode = new ArrayList<>();
@@ -98,6 +113,7 @@ public class LogServiceImpl implements LogService {
             logDTO.setStaffList(staffCode);
             logDTOS.add(logDTO);
         }
+        logger.info("Successfully fetched and mapped {} log.", logDTOS.size());
         return logDTOS;
     }
 
@@ -111,19 +127,24 @@ public class LogServiceImpl implements LogService {
             for (FieldEntity fieldEntity : fieldList){
                 List<LogEntity> logEntities = fieldEntity.getLogList();
                 logEntities.remove(logEntity);
+                logger.debug("Removed Field from FieldEntity with ID: {}", fieldEntity.getFieldCode());
             }
             for (CropEntity cropEntity : cropList){
                 List<LogEntity> logEntities = cropEntity.getLogList();
                 logEntities.remove(logEntity);
+                logger.debug("Removed Field from CropEntity with ID: {}", cropEntity.getCropCode());
             }
             for (StaffEntity staffEntity : staffList){
                 List<LogEntity> logEntities = staffEntity.getLogList();
                 logEntities.remove(logEntity);
+                logger.debug("Removed Staff from StaffEntity with ID: {}", staffEntity.getMemberCode());
             }
             logEntity.getFieldList().clear();
             logEntity.getStaffList().clear();
             logEntity.getCropList().clear();
+            logger.debug("Cleared relationships for LogEntity with ID: {}", id);
             logDAO.delete(logEntity);
+            logger.info("Successfully deleted log with ID: {}", id);
         }else {
             throw new CropNotFoundException("Log with id " + id + "not found");
         }
@@ -151,6 +172,7 @@ public class LogServiceImpl implements LogService {
             tmpLog.get().setStaffList(staffEntities);
             tmpLog.get().setCropList(cropEntities);
             tmpLog.get().setFieldList(fieldEntities);
+            logger.info("Successfully updated log with ID: {}", id);
         }
     }
 

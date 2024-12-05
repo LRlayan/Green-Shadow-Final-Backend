@@ -13,6 +13,8 @@ import com.example.cropMonitorSystem.exception.DataPersistException;
 import com.example.cropMonitorSystem.exception.EquipmentNotFoundException;
 import com.example.cropMonitorSystem.service.EquipmentService;
 import com.example.cropMonitorSystem.util.Mapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,7 @@ public class EquipmentServiceImpl implements EquipmentService {
     private StaffDAO staffDAO;
     @Autowired
     private Mapping mapping;
+    private static final Logger logger = LoggerFactory.getLogger(EquipmentService.class);
 
     @Override
     public void saveEquipment(EquipmentDTO equipmentDTO) {
@@ -46,27 +49,34 @@ public class EquipmentServiceImpl implements EquipmentService {
         List<StaffEntity> staffEntities = new ArrayList<>();
         for (String fieldCode : equipmentDTO.getFieldList()){
             fieldEntities.add(fieldDAO.getReferenceById(fieldCode));
+            logger.debug("Field with code {} found and associated.", fieldCode);
         }
         EquipmentEntity equipmentEntity = mapping.toEquipmentEntity(equipmentDTO);
         for (FieldEntity field:fieldEntities){
             field.getEquipmentsList().add(equipmentEntity);
+            logger.debug("Field with code {} found and associated.", field.getFieldCode());
         }
         for (String staffCode : equipmentDTO.getStaffCodeList()){
             staffEntities.add(staffDAO.getReferenceById(staffCode));
+            logger.debug("Staff with code {} found and associated.", staffCode);
         }
         for (StaffEntity staff:staffEntities){
             staff.getEquipmentList().add(equipmentEntity);
+            logger.debug("Staff with code {} found and associated.", staff.getMemberCode());
         }
         equipmentEntity.setFieldList(fieldEntities);
         equipmentEntity.setStaffCodeList(staffEntities);
         EquipmentEntity equEntity = equipmentDAO.save(equipmentEntity);
+        logger.info("Equipment saved with code: {}", equEntity.getEquipmentCode());
         if (equEntity == null){
+            logger.error("Failed to equipment. EquipmentEntity is null.");
             throw new DataPersistException("Equipment not saved!");
         }
     }
 
     @Override
     public List<EquipmentDTO> getAllEquipment() {
+        logger.info("Fetching and mapping all equipment from the database.");
         List<EquipmentDTO> equipmentDTOS = new ArrayList<>();
         for (EquipmentEntity equipmentEntity:equipmentDAO.findAll()){
             List<String> fieldCode = new ArrayList<>();
@@ -82,6 +92,7 @@ public class EquipmentServiceImpl implements EquipmentService {
             equipmentDTO.setStaffCodeList(staffCode);
             equipmentDTOS.add(equipmentDTO);
         }
+        logger.info("Successfully fetched and mapped {} equipment.", equipmentDTOS.size());
         return equipmentDTOS;
     }
 
@@ -94,13 +105,16 @@ public class EquipmentServiceImpl implements EquipmentService {
             for(FieldEntity field :fieldEntities){
                 List<EquipmentEntity> equipmentEntities = field.getEquipmentsList();
                 equipmentEntities.remove(equipment);
+                logger.debug("Removed Equipment from FieldEntity with ID: {}", field.getFieldCode());
             }
             equipment.getFieldList().clear();
+            logger.debug("Cleared relationships for EquipmentEntity with ID: {}", id);
         }
         if (!selectedEquipment.isPresent()){
             throw new EquipmentNotFoundException("Equipment Id with" + id + "Not found");
         }else {
             equipmentDAO.deleteById(id);
+            logger.info("Successfully deleted equipment with ID: {}", id);
         }
     }
 
@@ -131,15 +145,19 @@ public class EquipmentServiceImpl implements EquipmentService {
             }
             tmpEquipment.get().setFieldList(equipmentEntity.getFieldList());
             tmpEquipment.get().setStaffCodeList(equipmentEntity.getStaffCodeList());
+            logger.info("Successfully updated equipment with ID: {}", id);
         }
     }
 
     @Override
     public EquipmentStatus getSelectedEquipment(String equipmentId) {
+        logger.info("Fetching equipment with ID: {}", equipmentId);
         if(equipmentDAO.existsById(equipmentId)){
             var selectedEquipment = equipmentDAO.getReferenceById(equipmentId);
+            logger.info("Equipment with ID {} successfully fetched.", equipmentId);
             return mapping.toEquipmentDTO(selectedEquipment);
         }else {
+            logger.warn("Equipment with ID {} not found.", equipmentId);
             return new SelectedErrorStatus(2,"Selected Equipment not found");
         }
     }

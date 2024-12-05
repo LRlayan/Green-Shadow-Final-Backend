@@ -7,8 +7,11 @@ import com.example.cropMonitorSystem.dto.impl.*;
 import com.example.cropMonitorSystem.entity.impl.*;
 import com.example.cropMonitorSystem.exception.DataPersistException;
 import com.example.cropMonitorSystem.exception.FieldNotFoundException;
+import com.example.cropMonitorSystem.service.EquipmentService;
 import com.example.cropMonitorSystem.service.FieldService;
 import com.example.cropMonitorSystem.util.Mapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,9 @@ public class FieldServiceImpl implements FieldService {
     private EquipmentDAO equipmentDAO;
     @Autowired
     private Mapping mapping;
+    private static final Logger logger = LoggerFactory.getLogger(FieldServiceImpl.class);
+
+
     @Override
     public void saveField(FieldDTO fieldDTO) {
         int number = 0;
@@ -49,11 +55,17 @@ public class FieldServiceImpl implements FieldService {
             for (String id : fieldDTO.getMemberCodeList()){
                 if (staffDAO.existsById(id)){
                     staffEntities.add(staffDAO.getReferenceById(id));
+                    logger.debug("Staff with code {} found and associated.", id);
+                }else {
+                    logger.warn("Staff with code {} does not exist.", id);
                 }
             }
             for (String id : fieldDTO.getCropCodeList()){
                 if (cropDAO.existsById(id)){
                     cropEntities.add(cropDAO.getReferenceById(id));
+                    logger.debug("Crop with code {} found and associated.", id);
+                }else {
+                    logger.warn("Crop with code {} does not exist.", id);
                 }
             }
         }
@@ -62,13 +74,16 @@ public class FieldServiceImpl implements FieldService {
         fieldEntity.setStaffList(staffEntities);
         fieldEntity.setCropList(cropEntities);
         FieldEntity saveField = fieldDAO.save(fieldEntity);
+        logger.info("Field saved with code: {}", fieldEntity.getFieldCode());
         if (saveField == null){
+            logger.error("Failed to field. FieldEntity is null.");
             throw new DataPersistException("Field is not saved.");
         }
     }
 
     @Override
     public List<FieldDTO> getAllField() throws IOException, ClassNotFoundException {
+        logger.info("Fetching and mapping all field from the database.");
         List<FieldDTO> fieldDTOS = new ArrayList<>();
         for (FieldEntity fieldEntity : fieldDAO.findAll()){
             List<String> staffCode = new ArrayList<>();
@@ -84,6 +99,7 @@ public class FieldServiceImpl implements FieldService {
             fieldDTO.setLogCodeList(logCode);
             fieldDTOS.add(fieldDTO);
         }
+        logger.info("Successfully fetched and mapped {} field.", fieldDTOS.size());
         return fieldDTOS;
     }
 
@@ -97,18 +113,22 @@ public class FieldServiceImpl implements FieldService {
             for (EquipmentEntity equipmentEntity:equipmentEntities){
                 List<FieldEntity> fields = equipmentEntity.getFieldList();
                 fields.remove(fieldEntity);
+                logger.debug("Removed Field from EquipmentEntity with ID: {}", equipmentEntity.getFieldList().size());
             }
             for (StaffEntity staffEntity:staffEntities){
                 List<FieldEntity> fields = staffEntity.getFieldList();
                 fields.remove(fieldEntity);
+                logger.debug("Removed Field from StaffEntity with ID: {}", staffEntity.getFieldList().size());
             }
             fieldEntity.getEquipmentsList().clear();
             fieldEntity.getStaffList().clear();
+            logger.debug("Cleared relationships for FieldEntity with ID: {}", id);
         }
         if (!selectedField.isPresent()){
             throw new FieldNotFoundException("Field with id " + id + "not found");
         }else {
             fieldDAO.deleteById(id);
+            logger.info("Successfully deleted field with ID: {}", id);
         }
     }
 
@@ -131,14 +151,18 @@ public class FieldServiceImpl implements FieldService {
             }
             tmpField.get().setCropList(cropEntities);
             tmpField.get().setStaffList(staffEntities);
+            logger.info("Successfully updated field with ID: {}", id);
         }
     }
 
     @Override
     public FieldStatus getSelectedField(String fieldId) {
+        logger.info("Fetching field with ID: {}", fieldId);
         if (fieldDAO.existsById(fieldId)){
+            logger.info("Field with ID {} successfully fetched.", fieldId);
             return mapping.toFieldDTO(fieldDAO.getReferenceById(fieldId));
         }else {
+            logger.warn("Field with ID {} not found.", fieldId);
             return new SelectedErrorStatus(2,"Field with Code "+fieldId+" not found");
         }
     }

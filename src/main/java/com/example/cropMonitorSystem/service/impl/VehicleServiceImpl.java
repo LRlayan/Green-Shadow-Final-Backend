@@ -11,6 +11,8 @@ import com.example.cropMonitorSystem.exception.DataPersistException;
 import com.example.cropMonitorSystem.exception.VehicleNotFoundException;
 import com.example.cropMonitorSystem.service.VehicleService;
 import com.example.cropMonitorSystem.util.Mapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,7 @@ public class VehicleServiceImpl implements VehicleService {
     private Mapping mapping;
     @Autowired
     private StaffDAO staffDAO;
+    private static final Logger logger = LoggerFactory.getLogger(VehicleServiceImpl.class);
 
     @Override
     public void saveVehicle(VehicleDTO vehicleDTO) {
@@ -42,15 +45,19 @@ public class VehicleServiceImpl implements VehicleService {
         if (vehicleDTO.getMemberCode() != null){
             StaffEntity referenceById = staffDAO.getReferenceById(vehicleDTO.getMemberCode());
             vehicleEntity.setStaff(referenceById);
+            logger.debug("Staff with code {} found and associated.", referenceById.getMemberCode());
         }
         VehicleEntity save = vehicleDAO.save(vehicleEntity);
+        logger.info("Vehicle saved with code: {}", vehicleEntity.getVehicleCode());
         if (save == null){
+            logger.error("Failed to vehicle. VehicleEntity is null.");
             throw new DataPersistException("vehicle not saved");
         }
     }
 
     @Override
     public List<VehicleDTO> getAllVehicle() {
+        logger.info("Fetching and mapping all vehicle from the database.");
         List<VehicleDTO> vehicleDTOS = new ArrayList<>();
         List<VehicleEntity> all = vehicleDAO.findAll();
         for (VehicleEntity vehicle : all){
@@ -61,6 +68,7 @@ public class VehicleServiceImpl implements VehicleService {
             }
             vehicleDTOS.add(vehicleDTO);
         }
+        logger.info("Successfully fetched and mapped {} vehicle.", vehicleDTOS.size());
         return vehicleDTOS;
     }
 
@@ -71,6 +79,7 @@ public class VehicleServiceImpl implements VehicleService {
             throw new VehicleNotFoundException("vehicle Id with" + id + "Not found");
         }else {
             vehicleDAO.deleteById(id);
+            logger.info("Successfully deleted vehicle with ID: {}", id);
         }
     }
 
@@ -89,6 +98,7 @@ public class VehicleServiceImpl implements VehicleService {
                 StaffEntity staffEntity = staffDAO.getReferenceById(memberCode);
                 tmpVehicle.get().setStaff(staffEntity);
             }
+            logger.info("Successfully updated vehicle with ID: {}", id);
         }
     }
 
@@ -96,8 +106,10 @@ public class VehicleServiceImpl implements VehicleService {
     public VehicleStatus getSelectedVehicle(String id) {
         if(vehicleDAO.existsById(id)){
             var selectedVehicle = vehicleDAO.getReferenceById(id);
+            logger.info("Vehicle with ID {} successfully fetched.", id);
             return mapping.toVehicleDTO(selectedVehicle);
         }else {
+            logger.warn("Vehicle with ID {} not found.", id);
             return new SelectedErrorStatus(2,"Selected vehicle not found");
         }
     }
